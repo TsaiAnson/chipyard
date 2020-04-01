@@ -8,6 +8,7 @@ import freechips.rocketchip.config.{Field, Config, Parameters}
 import freechips.rocketchip.diplomacy.{LazyModule}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.subsystem._
+import freechips.rocketchip.system.{SimAXIMem}
 import freechips.rocketchip.util._
 
 import sifive.blocks.devices.gpio._
@@ -174,29 +175,31 @@ class WithSimNIC extends OverrideIOBinder({
   (system: CanHavePeripheryIceNICModuleImp) => system.connectSimNetwork(system.clock, system.reset.asBool); Nil
 })
 
+// Note: The parameters instance is accessible only through the BaseSubsystem
+// (technically, IsAttachable), and the self-type requirement in
+// CanHaveMasterAXI4MemPort is in sufficient to make accessible to the IOBinder
 // DOC include start: WithSimAXIMem
 class WithSimAXIMem extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MemPortModuleImp) => system.connectSimAXIMem(); Nil
+  (system: CanHaveMasterAXI4MemPort with BaseSubsystem) => SimAXIMem.connectMem(system)(system.p); Nil
 })
 // DOC include end: WithSimAXIMem
 
 class WithBlackBoxSimMem extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MemPortModuleImp) => {
-    (system.mem_axi4 zip system.outer.memAXI4Node).foreach { case (io, node) =>
+  (system: CanHaveMasterAXI4MemPort with BaseSubsystem) => {
+    (system.mem_axi4 zip system.memAXI4Node.in).foreach { case (io, (_, edge)) =>
       val memSize = system.p(ExtMem).get.master.size
       val lineSize = system.p(CacheBlockBytes)
-      (io zip node.in).foreach { case (axi4, (_, edge)) =>
-        val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle))
-        mem.io.axi <> axi4
-        mem.io.clock := system.clock
-        mem.io.reset := system.reset
-      }
-    }; Nil
+      val mem = Module(new SimDRAM(memSize, lineSize, edge.bundle))
+      mem.io.axi <> io
+      mem.io.clock := system.module.clock
+      mem.io.reset := system.module.reset
+    }
+    Nil
   }
 })
 
 class WithSimAXIMMIO extends OverrideIOBinder({
-  (system: CanHaveMasterAXI4MMIOPortModuleImp) => system.connectSimAXIMMIO(); Nil
+  (system: CanHaveMasterAXI4MMIOPort with BaseSubsystem) => SimAXIMem.connectMMIO(system)(system.p); Nil
 })
 
 class WithDontTouchPorts extends OverrideIOBinder({
@@ -213,7 +216,7 @@ class WithTieOffInterrupts extends OverrideIOBinder({
 })
 
 class WithTieOffL2FBusAXI extends OverrideIOBinder({
-  (system: CanHaveSlaveAXI4PortModuleImp) => {
+  (system: CanHaveSlaveAXI4Port with BaseSubsystem) => {
     system.l2_frontend_bus_axi4.foreach(axi => {
       axi.tieoff()
       experimental.DataMirror.directionOf(axi.ar.ready) match {
@@ -235,7 +238,7 @@ class WithTiedOffDebug extends OverrideIOBinder({
   (system: HasPeripheryDebugModuleImp) => {
     val (psdPort, debugPortOpt, ioCells) = AddIOCells.debug(system.psd, system.debug)
     val harnessFn = (th: chipyard.TestHarness) => {
-      Debug.tieoffDebug(debugPortOpt, psdPort)
+      Debug.tieoffDebug(debugPortOpt, Some(psdPort))
       // tieoffDebug doesn't actually tie everything off :/
       debugPortOpt.foreach(_.clockeddmi.foreach({ cdmi => cdmi.dmi.req.bits := DontCare }))
       Nil
