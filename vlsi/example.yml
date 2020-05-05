@@ -2,7 +2,7 @@
 # Technology used is ASAP7
 vlsi.core.technology: asap7
 # Specify dir with ASAP7 tarball
-technology.asap7.tarball_dir: ""
+technology.asap7.tarball_dir: "/home/ff/ee241/spring20-labs"
 
 vlsi.core.max_threads: 12
 
@@ -14,7 +14,7 @@ vlsi.inputs.power_spec_type: "cpf"
 
 # Specify clock signals
 vlsi.inputs.clocks: [
-  {name: "clock", period: "1ns", uncertainty: "0.1ns"}
+  {name: "clock", period: "20ns", uncertainty: "0.1ns"}
 ]
 
 # Generate Make include to aid in flow 
@@ -44,10 +44,12 @@ par.generate_power_straps_options:
     power_utilization_M8: 1.0
     power_utilization_M9: 1.0
 
+#par.innovus.floorplan_mode: auto
+
 # Placement Constraints
 # For ASAP7, all numbers must be 4x larger than final GDS
 vlsi.inputs.placement_constraints:
-  - path: "Sha3AccelwBB"
+  - path: "Gemmini"
     type: toplevel
     x: 0
     y: 0
@@ -58,15 +60,7 @@ vlsi.inputs.placement_constraints:
       right: 0
       top: 0
       bottom: 0
-  - path: "Sha3AccelwBB/dco"
-    type: hardmacro
-    x: 108
-    y: 108
-    width: 128
-    height: 128
-    orientation: r0
-    top_layer: M9
-  - path: "Sha3AccelwBB/place_obs_bottom"
+  - path: "Gemmini/place_obs_bottom"
     type: obstruction
     obs_types: ["place"]
     x: 0
@@ -82,46 +76,46 @@ vlsi.inputs.pin.assignments: [
 ]
 
 # Paths to extra libraries
-vlsi.technology.extra_libraries_meta: ["append", "deepsubst"]
-vlsi.technology.extra_libraries:
-  - library:
-      nldm liberty file_deepsubst_meta: "local"
-      nldm liberty file: "extra_libraries/example/ExampleDCO_PVT_0P63V_100C.lib"
-      lef file_deepsubst_meta: "local"
-      lef file: "extra_libraries/example/ExampleDCO.lef"
-      gds file_deepsubst_meta: "local"
-      gds file: "extra_libraries/example/ExampleDCO.gds"
-      corner:
-        nmos: "slow"
-        pmos: "slow"
-        temperature: "100 C"
-      supplies:
-        VDD: "0.63 V"
-        GND: "0 V"
-  - library:
-      nldm liberty file_deepsubst_meta: "local"
-      nldm liberty file: "extra_libraries/example/ExampleDCO_PVT_0P77V_0C.lib"
-      lef file_deepsubst_meta: "local"
-      lef file: "extra_libraries/example/ExampleDCO.lef"
-      gds file_deepsubst_meta: "local"
-      gds file: "extra_libraries/example/ExampleDCO.gds"
-      corner:
-        nmos: "fast"
-        pmos: "fast"
-        temperature: "0 C"
-      supplies:
-        VDD: "0.77 V"
-        GND: "0 V"
+#vlsi.technology.extra_libraries_meta: ["append", "deepsubst"]
+#vlsi.technology.extra_libraries:
+#  - library:
+#      nldm liberty file_deepsubst_meta: "local"
+#      nldm liberty file: "extra_libraries/example/ExampleDCO_PVT_0P63V_100C.lib"
+#      lef file_deepsubst_meta: "local"
+#      lef file: "extra_libraries/example/ExampleDCO.lef"
+#      gds file_deepsubst_meta: "local"
+#      gds file: "extra_libraries/example/ExampleDCO.gds"
+#      corner:
+#        nmos: "slow"
+#        pmos: "slow"
+#        temperature: "100 C"
+#      supplies:
+#        VDD: "0.63 V"
+#        GND: "0 V"
+#  - library:
+#      nldm liberty file_deepsubst_meta: "local"
+#      nldm liberty file: "extra_libraries/example/ExampleDCO_PVT_0P77V_0C.lib"
+#      lef file_deepsubst_meta: "local"
+#      lef file: "extra_libraries/example/ExampleDCO.lef"
+#      gds file_deepsubst_meta: "local"
+#      gds file: "extra_libraries/example/ExampleDCO.gds"
+#      corner:
+#        nmos: "fast"
+#        pmos: "fast"
+#        temperature: "0 C"
+#      supplies:
+#        VDD: "0.77 V"
+#        GND: "0 V"
 
 # Because the DCO is a dummy layout, we treat it as a physical-only cell
-par.inputs.physical_only_cells_mode: append
-par.inputs.physical_only_cells_list:
-  - ExampleDCO
+#par.inputs.physical_only_cells_mode: append
+#par.inputs.physical_only_cells_list:
+#  - ExampleDCO
 
 # SRAM Compiler compiler options
 vlsi.core.sram_generator_tool: "sram_compiler"
 # You should specify a location for the SRAM generator in the tech plugin
-vlsi.core.sram_generator_tool_path: []
+vlsi.core.sram_generator_tool_path: ["hammer/src/hammer-vlsi/technology/asap7"]
 vlsi.core.sram_generator_tool_path_meta: "append"
 
 # Tool options. Replace with your tool plugin of choice.
@@ -129,16 +123,36 @@ vlsi.core.sram_generator_tool_path_meta: "append"
 vlsi.core.synthesis_tool: "genus"
 vlsi.core.synthesis_tool_path: ["hammer-cadence-plugins/synthesis"]
 vlsi.core.synthesis_tool_path_meta: "append"
-synthesis.genus.version: "1813"
+#synthesis.genus.version: "1813"
+synthesis.genus:
+  genus_bin: "${cadence.cadence_home}/GENUS${synthesis.genus.version}/bin/genus"
+  version: "181"
 # Innovus options
 vlsi.core.par_tool: "innovus"
 vlsi.core.par_tool_path: ["hammer-cadence-plugins/par"]
 vlsi.core.par_tool_path_meta: "append"
+par.innovus.innovus_bin: "${cadence.cadence_home}/INNOVUS${par.innovus.version}/bin/innovus"
 par.innovus.version: "181"
-par.innovus.design_flow_effort: "standard"
+par.innovus.design_flow_effort: "express"
 par.inputs.gds_merge: true
 # Calibre options
 vlsi.core.drc_tool: "calibre"
 vlsi.core.drc_tool_path: ["hammer-mentor-plugins/drc"]
 vlsi.core.lvs_tool: "calibre"
 vlsi.core.lvs_tool_path: ["hammer-mentor-plugins/lvs"]
+mentor.mentor_home: "/share/instsww/mgc/calibre2017"
+drc.calibre.version: "2017.4_35.25"
+drc.calibre:
+  calibre_drc_bin: "${mentor.mentor_home}/aoi_cal_${lvs.calibre.version}/bin/calibre"
+  calibre_drc_bin_meta: lazysubst
+  calibredrv_bin: "${mentor.mentor_home}/aoi_cal_${lvs.calibre.version}/bin/calibredrv"
+  calibredrv_bin_meta: lazysubst
+  v2lvs_bin: "${mentor.mentor_home}/aoi_cal_${lvs.calibre.version}/bin/v2lvs"
+lvs.calibre.version: "2017.4_35.25"
+lvs.calibre:
+  calibre_lvs_bin: "${mentor.mentor_home}/aoi_cal_${lvs.calibre.version}/bin/calibre"
+  calibre_lvs_bin_meta: lazysubst
+  calibredrv_bin: "${mentor.mentor_home}/aoi_cal_${lvs.calibre.version}/bin/calibredrv"
+  calibredrv_bin_meta: lazysubst
+  v2lvs_bin: "${mentor.mentor_home}/aoi_cal_${lvs.calibre.version}/bin/v2lvs"
+  v2lvs_bin_meta: lazysubst

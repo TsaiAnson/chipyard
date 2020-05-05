@@ -62,6 +62,30 @@ ifeq ($(SUB_PROJECT),hwacha)
 	TB                ?= TestDriver
 	TOP               ?= ExampleRocketSystem
 endif
+ifeq ($(SUB_PROJECT),gemmini-float)
+	SBT_PROJECT       ?= chipyard
+       	MODEL             ?= TestHarness
+       	VLOG_MODEL        ?= TestHarness
+       	MODEL_PACKAGE     ?= $(SBT_PROJECT)
+       	CONFIG            ?= GemminiFloatRocketConfig
+       	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
+       	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
+       	TB                ?= TestDriver
+       	TOP               ?= Top
+	VLSI_TOP	  ?= Gemmini
+endif
+ifeq ($(SUB_PROJECT),gemmini-bfloat)
+       	SBT_PROJECT       ?= chipyard
+       	MODEL             ?= TestHarness
+       	VLOG_MODEL        ?= TestHarness
+       	MODEL_PACKAGE     ?= $(SBT_PROJECT)
+       	CONFIG            ?= GemminiBfloatRocketConfig
+       	CONFIG_PACKAGE    ?= $(SBT_PROJECT)
+       	GENERATOR_PACKAGE ?= $(SBT_PROJECT)
+       	TB                ?= TestDriver
+       	TOP               ?= Top
+	VLSI_TOP	  ?= Gemmini
+endif
 # Stand-in firechip variables:
 # TODO: need a seperate generator and test harnesses for each target
 #ifeq ($(SUB_PROJECT),firechip)
