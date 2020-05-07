@@ -11,15 +11,15 @@ import firesim.configs._
 //* EE290-2 Project FireSim Gemmini Configurations
 //*********************************************************************************/
 
-class FireSimGemminiBfloatRocketConfig extends Config(
+class FireSimBfloatGemminiRocketConfig extends Config(
   new WithInclusiveCache ++
   new gemmini.GemminiBfloatConfig ++
   new WithNBigCores(1) ++
-  new FireSimRocketChipConfig)
+  new FireSimRocketConfig)
 
 
-class FireSimGemminiFloatRocketConfig extends Config(
+class FireSimFloatGemminiRocketConfig extends Config(
   new WithInclusiveCache ++
   new gemmini.GemminiFloatConfig ++
   new WithNBigCores(1) ++
-  new FireSimRocketChipConfig)
+  new FireSimRocketConfig)
