@@ -20,6 +20,7 @@ lazy val commonSettings = Seq(
   libraryDependencies += "com.github.scopt" %% "scopt" % "3.7.0",
   libraryDependencies += "org.scala-lang.modules" % "scala-jline" % "2.12.1",
   libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.10",
+  libraryDependencies += "edu.berkeley.cs" %% "chiseltest" % "0.2-SNAPSHOT",
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   unmanagedBase := (chipyardRoot / unmanagedBase).value,
   allDependencies := allDependencies.value.filterNot(_.organization == "edu.berkeley.cs"),
